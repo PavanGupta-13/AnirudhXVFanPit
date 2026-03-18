@@ -6,6 +6,7 @@ import Chat from './components/Chat'
 import VibeMeter from './components/VibeMeter'
 import BottomNav from './components/BottomNav'
 import InfoSection from './components/InfoSection'
+import ContributeSection from './components/ContributeSection'
 import { useSetlist } from './hooks/useSetlist'
 import { useChat } from './hooks/useChat'
 
@@ -93,6 +94,7 @@ function AppInner() {
           <Setlist />
           <Chat />
           <InfoSection />
+          <ContributeSection />
         </main>
       )}
 

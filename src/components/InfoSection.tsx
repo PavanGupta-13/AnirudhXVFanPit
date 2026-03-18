@@ -37,13 +37,12 @@ const InfoSection: React.FC = () => {
           style={{ borderColor: 'rgba(255,238,0,0.2)' }}
         >
           <p className="text-xs text-white/50 font-body text-center leading-relaxed">
-            ⚠️ Unofficial fan-made companion app · Not affiliated with or endorsed by any official concert organizer.
             Built with ❤️ by fans, for fans.
           </p>
         </div>
 
         {/* Social links placeholder */}
-        <div className="text-center mt-8 space-y-2">
+        {/* <div className="text-center mt-8 space-y-2">
           <p className="text-xs text-white/30 font-display uppercase tracking-widest">Follow Anirudh</p>
           <div className="flex justify-center gap-4">
             {['Instagram', 'Twitter/X', 'YouTube'].map((platform) => (
@@ -55,7 +54,7 @@ const InfoSection: React.FC = () => {
               </span>
             ))}
           </div>
-        </div>
+        </div> */}
 
         {/* Footer */}
         <div className="text-center mt-10 pt-6 border-t border-white/5">
