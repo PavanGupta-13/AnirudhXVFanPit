@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useCallback } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import QRCode from 'qrcode'
 
 const UPI_ID   = 'pavanguptak13@okicici'
@@ -66,7 +66,7 @@ const ContributeSection: React.FC = () => {
   const canvasRef  = useRef<HTMLCanvasElement>(null)
   const [selected, setSelected] = useState(99)
   const [custom, setCustom]     = useState('')
-  const [copied, setCopied]     = useState(false)
+  // const [copied, setCopied]     = useState(false)
   const [showCustom, setShowCustom] = useState(false)
   const [paying, setPaying]     = useState<string | null>(null)
 
@@ -85,11 +85,11 @@ const ContributeSection: React.FC = () => {
     }).catch(console.warn)
   }, [finalAmount])
 
-  const copyUpiId = useCallback(async () => {
-    await navigator.clipboard.writeText(UPI_ID).catch(() => {})
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2500)
-  }, [])
+  // const copyUpiId = useCallback(async () => {
+  //   await navigator.clipboard.writeText(UPI_ID).catch(() => {})
+  //   setCopied(true)
+  //   setTimeout(() => setCopied(false), 2500)
+  // }, [])
 
   const handlePay = (appId: string) => {
     setPaying(appId)
