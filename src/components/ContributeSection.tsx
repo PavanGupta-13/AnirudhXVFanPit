@@ -189,7 +189,7 @@ const ContributeSection: React.FC = () => {
           </div>
 
           {/* UPI ID + copy */}
-          <div
+          {/* <div
             className="flex items-center gap-2 px-4 py-2.5 rounded-full w-full justify-between"
             style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}
           >
@@ -204,7 +204,7 @@ const ContributeSection: React.FC = () => {
             >
               {copied ? '✓ Copied' : 'Copy'}
             </button>
-          </div>
+          </div> */}
         </div>
 
         {/* Payment app deep links */}

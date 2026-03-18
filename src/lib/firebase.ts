@@ -7,6 +7,7 @@ import {
   query,
   orderBy,
   limit,
+  where,
   onSnapshot,
   serverTimestamp,
   doc,
@@ -14,6 +15,8 @@ import {
   setDoc,
   deleteDoc,
   getDoc,
+  getDocs,
+  writeBatch,
   increment,
   Unsubscribe,
 } from 'firebase/firestore'
@@ -192,6 +195,41 @@ export const castVote = async (db: Firestore, songId: string, uid: string): Prom
 export const removeVote = async (db: Firestore, songId: string, uid: string): Promise<void> => {
   await deleteDoc(doc(db, 'votes', `${uid}_${songId}`))
   await updateDoc(doc(db, 'setlist', songId), { hypeCount: increment(-1) })
+}
+
+// ─── Setlist real-time ────────────────────────────────────────────────────────
+
+export const subscribeToSetlist = (
+  db: Firestore,
+  callback: (songs: Record<string, unknown>[]) => void
+): Unsubscribe => {
+  return onSnapshot(collection(db, 'setlist'), (snap) => {
+    callback(snap.docs.map((d) => ({ id: d.id, ...d.data() })))
+  })
+}
+
+export const seedSetlistIfEmpty = async (
+  db: Firestore,
+  songs: Record<string, unknown>[]
+): Promise<void> => {
+  const snap = await getDocs(collection(db, 'setlist'))
+  if (!snap.empty) return
+  const batch = writeBatch(db)
+  songs.forEach((song) => batch.set(doc(db, 'setlist', song.id as string), song))
+  await batch.commit()
+}
+
+// ─── Votes real-time ─────────────────────────────────────────────────────────
+
+export const subscribeToUserVotes = (
+  db: Firestore,
+  uid: string,
+  callback: (votedSongIds: string[]) => void
+): Unsubscribe => {
+  const q = query(collection(db, 'votes'), where('uid', '==', uid))
+  return onSnapshot(q, (snap) => {
+    callback(snap.docs.map((d) => d.data().songId as string))
+  })
 }
 
 export { collection, doc, onSnapshot, query, orderBy, limit }
