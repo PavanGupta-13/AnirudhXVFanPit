@@ -37,7 +37,7 @@ const firebaseConfig = {
 }
 
 export const isFirebaseConfigured = (): boolean =>
-  !!(firebaseConfig.apiKey && firebaseConfig.projectId && firebaseConfig.apiKey !== 'your_api_key_here')
+  !!(firebaseConfig.apiKey && firebaseConfig.projectId && firebaseConfig.apiKey !== 'AIzaSyBriLZE0quJsBTtfYANYKXZAwOX0AW0Cmo')
 
 let _app:  FirebaseApp | null = null
 let _db:   Firestore   | null = null
