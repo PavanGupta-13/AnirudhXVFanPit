@@ -27,6 +27,9 @@ const SelfieCam: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
 
+  // streamRequested: user tapped "Open Camera" (stream assigned to video element)
+  // streaming: video element fired canplay — first frame is available
+  const [streamRequested, setStreamRequested] = useState(false)
   const [streaming, setStreaming] = useState(false)
   const [permissionDenied, setPermissionDenied] = useState(false)
   const [filterMode, setFilterMode] = useState<FilterMode>(0)
@@ -42,12 +45,9 @@ const SelfieCam: React.FC = () => {
         audio: false,
       })
       streamRef.current = stream
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream
-        videoRef.current.play()
-      }
-      setStreaming(true)
       setPermissionDenied(false)
+      setStreamRequested(true)
+      // srcObject is assigned in a useEffect after the video element mounts
       // Show privacy tooltip on first open
       const seen = localStorage.getItem('cam_tooltip_seen')
       if (!seen) {
@@ -59,6 +59,13 @@ const SelfieCam: React.FC = () => {
       setPermissionDenied(true)
     }
   }, [])
+
+  // Assign srcObject after video element mounts (streamRequested flipping true renders it)
+  useEffect(() => {
+    if (streamRequested && videoRef.current && streamRef.current) {
+      videoRef.current.srcObject = streamRef.current
+    }
+  }, [streamRequested])
 
   useEffect(() => {
     return () => {
@@ -72,11 +79,14 @@ const SelfieCam: React.FC = () => {
     const container = containerRef.current
     if (!video || !canvas || !container) return
 
+    // Ensure video has actual frame data — videoWidth is 0 until stream is ready
+    if (!video.videoWidth || video.readyState < 2) return
+
     setShutter(true)
     setTimeout(() => setShutter(false), 200)
 
-    const w = video.videoWidth  || container.offsetWidth
-    const h = video.videoHeight || container.offsetHeight
+    const w = video.videoWidth
+    const h = video.videoHeight
     canvas.width  = w
     canvas.height = h
 
@@ -211,7 +221,7 @@ const SelfieCam: React.FC = () => {
     }
   }
 
-  if (!streaming) {
+  if (!streamRequested) {
     return (
       <section id="camera" className="min-h-screen flex flex-col items-center justify-center px-4 pb-28">
         <div className="glass-card p-8 text-center max-w-sm w-full animate-bounce-in">
@@ -236,8 +246,12 @@ const SelfieCam: React.FC = () => {
     )
   }
 
+  // NAV_HEIGHT: fixed BottomNav is ~72px. Controls must sit above it.
+  const NAV_H = 'calc(72px + env(safe-area-inset-bottom, 0px))'
+
   return (
-    <section id="camera" className="relative min-h-screen pb-28 overflow-hidden bg-black">
+    // fixed inset-0: fills entire viewport; flex-col: video grows, controls anchored at bottom
+    <section id="camera" className="fixed inset-0 z-40 flex flex-col bg-black overflow-hidden">
       {/* Privacy tooltip */}
       {showTooltip && (
         <div className="absolute top-4 left-4 right-4 z-50 animate-slide-up">
@@ -247,18 +261,26 @@ const SelfieCam: React.FC = () => {
         </div>
       )}
 
-      {/* Camera view */}
+      {/* Loading overlay — shown until video fires canplay */}
+      {!streaming && (
+        <div className="absolute inset-0 z-30 flex items-center justify-center bg-black">
+          <div className="text-white/40 font-display animate-pulse text-sm">Starting camera…</div>
+        </div>
+      )}
+
+      {/* Camera view — flex-1 fills remaining height above controls */}
       <div
         ref={containerRef}
-        className="relative w-full camera-container"
-        style={{ height: 'calc(100dvh - 120px)', overflow: 'hidden' }}
+        className="relative flex-1 overflow-hidden"
       >
         <video
           ref={videoRef}
           className="w-full h-full object-cover"
           style={{ transform: 'scaleX(-1)', ...FILTER_STYLES[filterMode] }}
           playsInline
+          autoPlay
           muted
+          onCanPlay={() => setStreaming(true)}
         />
 
         {/* Colour overlay */}
@@ -281,12 +303,12 @@ const SelfieCam: React.FC = () => {
         <div className="absolute right-4 bottom-1/4 pointer-events-none animate-music-note opacity-40 text-neon-purple text-2xl" style={{ animationDelay: '0.5s' }}>♬</div>
 
         {/* Equalizer bars – bottom edges */}
-        <div className="absolute bottom-16 left-4 flex items-end gap-0.5 pointer-events-none opacity-70">
+        <div className="absolute bottom-4 left-4 flex items-end gap-0.5 pointer-events-none opacity-70">
           {[8,14,10,18,12,16,9,13,11].map((h, i) => (
             <div key={i} className="equalizer-bar" style={{ height: h, animationDelay: `${i * 0.1}s` }} />
           ))}
         </div>
-        <div className="absolute bottom-16 right-4 flex items-end gap-0.5 pointer-events-none opacity-70">
+        <div className="absolute bottom-4 right-4 flex items-end gap-0.5 pointer-events-none opacity-70">
           {[11,13,9,16,12,18,10,14,8].map((h, i) => (
             <div key={i} className="equalizer-bar" style={{ height: h, animationDelay: `${i * 0.1 + 0.5}s` }} />
           ))}
@@ -308,10 +330,14 @@ const SelfieCam: React.FC = () => {
         )}
       </div>
 
-      {/* Controls */}
+      {/* Controls — sits in flex flow, padding-bottom clears the fixed BottomNav */}
       <div
-        className="absolute bottom-0 left-0 right-0 px-4 py-4"
-        style={{ background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(20px)' }}
+        className="shrink-0 px-4 pt-4"
+        style={{
+          background: 'rgba(0,0,0,0.85)',
+          backdropFilter: 'blur(20px)',
+          paddingBottom: NAV_H,
+        }}
       >
         <div className="flex items-center justify-between gap-4">
           {/* Filter selector */}
