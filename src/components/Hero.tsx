@@ -169,12 +169,12 @@ const Hero: React.FC<Props> = ({ onOpenSetlist, onOpenChat }) => {
       </div>
 
       {/* Scroll indicator */}
-      <div className="absolute bottom-24 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-40 animate-bounce pointer-events-none">
+      {/* <div className="absolute bottom-24 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-40 animate-bounce pointer-events-none">
         <span className="text-xs font-display text-white/60">scroll to explore</span>
         <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
         </svg>
-      </div>
+      </div> */}
     </section>
   )
 }

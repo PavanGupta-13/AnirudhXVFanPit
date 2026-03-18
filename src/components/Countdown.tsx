@@ -130,7 +130,7 @@ const Countdown: React.FC<Props> = ({ onOpenSetlist, onOpenChat }) => {
         onTouchEnd={handleLogoPressEnd}
         title="Long press for a surprise!"
       >
-        <span className="text-xs text-white/20 font-mono">long press ↑ logo for surprise</span>
+        <span className="text-xs text-white/20 font-mono">long press here for surprise!!</span>
       </div>
     </div>
   )
