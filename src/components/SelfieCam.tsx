@@ -26,6 +26,8 @@ const SelfieCam: React.FC = () => {
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
+  // const rockstarImgRef = useRef<HTMLImageElement | null>(null)
+  const stampImgRef    = useRef<HTMLImageElement | null>(null)
 
   // streamRequested: user tapped "Open Camera" (stream assigned to video element)
   // streaming: video element fired canplay — first frame is available
@@ -37,6 +39,12 @@ const SelfieCam: React.FC = () => {
   const [showTooltip, setShowTooltip] = useState(false)
   const [shutter, setShutter] = useState(false)
   const streamRef = useRef<MediaStream | null>(null)
+
+  // Preload overlay images so they're ready when takeSnap fires
+  useEffect(() => {
+    // const rockstar = new Image(); rockstar.src = '/RockstarAni.jpg'; rockstarImgRef.current = rockstar
+    const stamp    = new Image(); stamp.src    = '/AnirudhStamp.jpg'; stampImgRef.current    = stamp
+  }, [])
 
   const startCamera = useCallback(async () => {
     try {
@@ -136,6 +144,30 @@ const SelfieCam: React.FC = () => {
       ctx.fillRect(0, 0, w, h)
       ctx.globalAlpha = 1
     }
+
+    // ── Asset overlays ──
+    ctx.globalAlpha = 1
+
+    // RockstarAni — bottom-right portrait, 38% canvas width
+    const stamp = stampImgRef.current
+    if (stamp?.complete && stamp.naturalWidth > 0) {
+      const rW = Math.floor(w * 0.38)
+      const rH = Math.floor(rW * (stamp.naturalHeight / stamp.naturalWidth))
+      ctx.globalAlpha = 0.92
+      ctx.drawImage(stamp, w - rW, h - rH, rW, rH)
+      ctx.globalAlpha = 1
+    }
+
+    // AnirudhStamp — top-right corner, 26% canvas width
+    // const stamp = stampImgRef.current
+    // if (stamp?.complete && stamp.naturalWidth > 0) {
+    //   const sW = Math.floor(w * 0.26)
+    //   const sH = Math.floor(sW * (stamp.naturalHeight / stamp.naturalWidth))
+    //   const pad = Math.floor(w * 0.025)
+    //   ctx.globalAlpha = 0.95
+    //   ctx.drawImage(stamp, w - sW - pad, pad, sW, sH)
+    //   ctx.globalAlpha = 1
+    // }
 
     // ── Text overlays ──
     ctx.globalAlpha = 1
@@ -294,6 +326,34 @@ const SelfieCam: React.FC = () => {
           >
             ROCKSTAR ANIRUDH XV · HYD
           </div>
+        </div>
+
+        {/* AnirudhStamp — top-right corner */}
+        <div className="absolute top-3 right-3 pointer-events-none z-10" style={{ width: '26%' }}>
+          <img
+            src="/AnirudhStamp.jpg"
+            alt=""
+            className="w-full rounded-lg"
+            style={{ opacity: 0.92, filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.6))' }}
+          />
+        </div>
+
+        {/* RockstarAni — bottom-right portrait */}
+        <div
+          className="absolute bottom-0 right-0 pointer-events-none z-10"
+          style={{ width: '38%' }}
+        >
+          <img
+            src="/RockstarAni.jpg"
+            alt=""
+            className="w-full"
+            style={{
+              opacity: 0.92,
+              filter: 'drop-shadow(-4px 0 16px rgba(191,0,255,0.5))',
+              maskImage: 'linear-gradient(to top, black 70%, transparent 100%)',
+              WebkitMaskImage: 'linear-gradient(to top, black 70%, transparent 100%)',
+            }}
+          />
         </div>
 
         {/* Animated music notes edges */}
